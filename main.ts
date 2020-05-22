@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import fs from "fs";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import FormData from "form-data";
 
 /**
@@ -89,8 +89,14 @@ async function run(): Promise<void> {
     // we get to this line
     core.info("Successfully uploaded archive to staging Upload API");
   } catch (error) {
-    core.debug(JSON.stringify(error));
-    core.setFailed(error.message);
+    if (error.response != null) {
+      const axiosError = error as AxiosError;
+      core.debug(JSON.stringify(axiosError.response));
+      core.setFailed(`${axiosError.message}: ${axiosError.response?.data}`);
+    } else {
+      core.debug(JSON.stringify(error));
+      core.setFailed(error.message);
+    }
   }
 }
 
