@@ -74,10 +74,9 @@ async function run(): Promise<void> {
     const url = `${apiUrl}/upload`;
     await axios.post(url, formData, {
       params: {
-        event,
+        event: event === "pull_request" ? "pr" : "commit",
         // eslint-disable-next-line @typescript-eslint/camelcase
-        event_id:
-          event === "commit" ? eventId.slice(0, 7) : extractPrNumber(eventId),
+        event_id: eventId,
       },
       headers: {
         Authorization: `Bearer ${token}`,

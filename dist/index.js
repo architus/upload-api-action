@@ -1212,9 +1212,9 @@ function run() {
             const url = `${apiUrl}/upload`;
             yield axios_1.default.post(url, formData, {
                 params: {
-                    event,
+                    event: event === "pull_request" ? "pr" : "commit",
                     // eslint-disable-next-line @typescript-eslint/camelcase
-                    event_id: event === "commit" ? eventId.slice(0, 7) : extractPrNumber(eventId),
+                    event_id: eventId,
                 },
                 headers: Object.assign({ Authorization: `Bearer ${token}` }, formData.getHeaders()),
             });
