@@ -80,7 +80,7 @@ async function run(): Promise<void> {
         event_id: eventId,
       },
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token,
         ...formData.getHeaders(),
       },
     });

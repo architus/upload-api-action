@@ -1217,7 +1217,7 @@ function run() {
                     // eslint-disable-next-line @typescript-eslint/camelcase
                     event_id: eventId,
                 },
-                headers: Object.assign({ Authorization: `Bearer ${token}` }, formData.getHeaders()),
+                headers: Object.assign({ Authorization: token }, formData.getHeaders()),
             });
             // Errors thrown here should be caught in the try block, so request is successful if
             // we get to this line
