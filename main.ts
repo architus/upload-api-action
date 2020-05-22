@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import fs from "fs";
-import axios, { AxiosError } from "axios";
-import FormData from "form-data";
+import path from "path";
+import request from "request";
 import jsonStringify from "safe-json-stringify";
 
 /**
@@ -68,42 +68,39 @@ async function run(): Promise<void> {
     const resolvedEvent = event === "pull_request" ? "pr" : "commit";
     core.info(`Preparing request to Upload API at ${resolvedEvent}/${eventId}`);
 
-    // Construct form data with archive read stream from the filesystem
-    const formData = new FormData();
-    const archiveStream = fs.createReadStream(archivePath);
-    formData.append("file", archiveStream);
-
     const url = `${apiUrl}/upload`;
-    await axios.post(url, formData, {
-      params: {
-        event: resolvedEvent,
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        event_id: eventId,
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...formData.getHeaders(),
-      },
-    });
+    const filename = path.basename(archivePath);
+    const archiveStream = fs.createReadStream(archivePath);
+    await new Promise<void>((resolve, failure) =>
+      request(
+        {
+          url,
+          method: "POST",
+          headers: {
+            "cache-control": "no-cache",
+            "content-disposition": `attachment; filename=${filename}`,
+            "content-type": "application/gzip",
+            authorization: "Basic token",
+          },
+          encoding: null,
+          body: archiveStream,
+        },
+        (error) => {
+          if (error) {
+            failure(error);
+          } else {
+            resolve();
+          }
+        },
+      ),
+    );
 
     // Errors thrown here should be caught in the try block, so request is successful if
     // we get to this line
     core.info("Successfully uploaded archive to staging Upload API");
   } catch (error) {
-    if (error.response != null) {
-      const axiosError = error as AxiosError;
-      core.debug(jsonStringify(axiosError.response?.data as object));
-      core.debug(String(axiosError.response?.status));
-      core.debug(jsonStringify(axiosError.response?.headers as object));
-      core.setFailed(
-        `${axiosError.message}: ${jsonStringify(
-          axiosError.response?.data ?? {},
-        )}`,
-      );
-    } else {
-      core.debug(jsonStringify(error));
-      core.setFailed(error.message);
-    }
+    core.debug(jsonStringify(error));
+    core.setFailed(error.message);
   }
 }
 

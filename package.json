@@ -26,10 +26,9 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.0",
-    "@types/axios": "^0.14.0",
+    "@types/request": "^2.48.5",
     "@types/safe-json-stringify": "^1.1.1",
-    "axios": "^0.19.2",
-    "form-data": "^3.0.0",
+    "request": "^2.88.2",
     "safe-json-stringify": "^1.2.0"
   },
   "devDependencies": {
