@@ -47,11 +47,11 @@ async function run(): Promise<void> {
   try {
     // Get inputs from job
     const archivePath: string = core.getInput("archive-path");
-    const event: string = core.getInput("event");
     const apiUrl: string = core.getInput("api-root");
     const token: string = core.getInput("token");
 
     // Extract the eventId from the environment
+    const event = process.env.GITHUB_EVENT_NAME ?? "";
     const ref = process.env.GITHUB_REF;
     const sha = process.env.GITHUB_SHA;
     const eventId = getEventId(event, ref ?? "", sha ?? "");

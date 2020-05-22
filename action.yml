@@ -4,9 +4,6 @@ inputs:
   archive-path:
     description: 'Path of the build archive'
     required: true
-  event:
-    description: 'Cause of CI run (`pull_request` or `push`)'
-    required: true
   token:
     description: 'Upload API token'
     required: true
