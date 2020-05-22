@@ -13,6 +13,21 @@ async function fileExists(path: string): Promise<boolean> {
   );
 }
 
+const PR_NUMBER_REGEX = /refs\/pull\/([0-9]+)\/merge/;
+
+/**
+ * Attempts to extract the PR number from the github ref
+ * @param ref - GitHub ref from the environment variable `GITHUB_REF`
+ */
+function extractPrNumber(ref: string): string {
+  const matchObject = ref.match(PR_NUMBER_REGEX);
+  if (matchObject != null) {
+    return matchObject[1];
+  }
+
+  return "0";
+}
+
 /**
  * Executes the primary logic of the action
  */
@@ -46,7 +61,8 @@ async function run(): Promise<void> {
       params: {
         event,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        event_id: event === "commit" ? eventId.slice(0, 7) : eventId,
+        event_id:
+          event === "commit" ? eventId.slice(0, 7) : extractPrNumber(eventId),
       },
       headers: {
         Authorization: `Bearer ${token}`,
