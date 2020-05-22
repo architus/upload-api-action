@@ -92,8 +92,14 @@ async function run(): Promise<void> {
   } catch (error) {
     if (error.response != null) {
       const axiosError = error as AxiosError;
-      core.debug(jsonStringify(axiosError.response as object));
-      core.setFailed(`${axiosError.message}: ${axiosError.response?.data}`);
+      core.debug(jsonStringify(axiosError.response?.data as object));
+      core.debug(String(axiosError.response?.status));
+      core.debug(jsonStringify(axiosError.response?.headers as object));
+      core.setFailed(
+        `${axiosError.message}: ${jsonStringify(
+          axiosError.response?.data ?? {},
+        )}`,
+      );
     } else {
       core.debug(jsonStringify(error));
       core.setFailed(error.message);

@@ -1187,7 +1187,7 @@ function getEventId(event, ref, sha) {
  * Executes the primary logic of the action
  */
 function run() {
-    var _a, _b;
+    var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Get inputs from job
@@ -1228,8 +1228,10 @@ function run() {
         catch (error) {
             if (error.response != null) {
                 const axiosError = error;
-                core.debug(safe_json_stringify_1.default(axiosError.response));
-                core.setFailed(`${axiosError.message}: ${(_b = axiosError.response) === null || _b === void 0 ? void 0 : _b.data}`);
+                core.debug(safe_json_stringify_1.default((_b = axiosError.response) === null || _b === void 0 ? void 0 : _b.data));
+                core.debug(String((_c = axiosError.response) === null || _c === void 0 ? void 0 : _c.status));
+                core.debug(safe_json_stringify_1.default((_d = axiosError.response) === null || _d === void 0 ? void 0 : _d.headers));
+                core.setFailed(`${axiosError.message}: ${safe_json_stringify_1.default((_f = (_e = axiosError.response) === null || _e === void 0 ? void 0 : _e.data) !== null && _f !== void 0 ? _f : {})}`);
             }
             else {
                 core.debug(safe_json_stringify_1.default(error));
