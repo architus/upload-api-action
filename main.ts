@@ -8,9 +8,9 @@ import jsonStringify from "safe-json-stringify";
  * Checks to see if a file exists using the fs API in an async function
  * @param path - Filesystem path
  */
-async function fileExists(path: string): Promise<boolean> {
+async function fileExists(filePath: string): Promise<boolean> {
   return new Promise<boolean>((r) =>
-    fs.access(path, fs.constants.F_OK, (e) => r(!e)),
+    fs.access(filePath, fs.constants.F_OK, (e) => r(!e)),
   );
 }
 
