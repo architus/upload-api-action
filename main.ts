@@ -64,7 +64,8 @@ async function run(): Promise<void> {
       return;
     }
 
-    core.info("Preparing request to Upload API");
+    const resolvedEvent = event === "pull_request" ? "pr" : "commit";
+    core.info(`Preparing request to Upload API at ${resolvedEvent}/${eventId}`);
 
     // Construct form data with archive read stream from the filesystem
     const formData = new FormData();
@@ -74,7 +75,7 @@ async function run(): Promise<void> {
     const url = `${apiUrl}/upload`;
     await axios.post(url, formData, {
       params: {
-        event: event === "pull_request" ? "pr" : "commit",
+        event: resolvedEvent,
         // eslint-disable-next-line @typescript-eslint/camelcase
         event_id: eventId,
       },
