@@ -5028,7 +5028,7 @@ function run() {
                 headers: {
                     "cache-control": "no-cache",
                     "content-disposition": `attachment; filename=${filename}`,
-                    "content-type": "application/gzip",
+                    "content-type": "application/octet-stream",
                     authorization: "Basic token",
                 },
                 encoding: null,
