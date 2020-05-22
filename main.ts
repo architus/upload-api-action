@@ -36,8 +36,8 @@ async function run(): Promise<void> {
     // Get inputs from job
     const archivePath: string = core.getInput("archive-path");
     const event: string = core.getInput("event");
-    const eventId: string = core.getInput("event_id");
-    const apiUrl: string = core.getInput("api-url");
+    const eventId: string = core.getInput("event-id");
+    const apiUrl: string = core.getInput("api-root");
     const token: string = core.getInput("token");
 
     // Ensure the token gets masked from log output
