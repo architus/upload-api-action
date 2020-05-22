@@ -1,0 +1,18 @@
+name: 'Architus Upload API Client'
+description: 'Uploads build archives to the Architus staging upload API'
+inputs:
+  archive-path:
+    description: 'Path of the build archive'
+    required: true
+  event:
+    description: 'Cause of CI run (`pr` or `commit`)'
+    required: true
+  event-id:
+    description: 'Short commit SHA or PR Id'
+    required: true
+  token:
+    description: 'Upload API token'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/main.js'
