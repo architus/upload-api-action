@@ -46,7 +46,7 @@ async function run(): Promise<void> {
       params: {
         event,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        event_id: eventId,
+        event_id: event === "commit" ? eventId.slice(0, 7) : eventId,
       },
       headers: {
         Authorization: `Bearer ${token}`,
