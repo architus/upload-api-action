@@ -25,7 +25,18 @@ function extractPrNumber(ref: string): string {
     return matchObject[1];
   }
 
-  return "0";
+  throw new Error(`No PR match on ref ${ref}`);
+}
+
+/**
+ * Gets the event ID from the event input and the ref/sha values
+ * @param event - underlying event name from the job
+ * @param ref - value of `GITHUB_REF` env variable
+ * @param sha - long commit SHA, value of `GITHUB_SHA` env variable
+ */
+function getEventId(event: string, ref: string, sha: string): string {
+  if (event === "pull_request") return extractPrNumber(ref);
+  return sha.slice(0, 7);
 }
 
 /**
@@ -36,9 +47,13 @@ async function run(): Promise<void> {
     // Get inputs from job
     const archivePath: string = core.getInput("archive-path");
     const event: string = core.getInput("event");
-    const eventId: string = core.getInput("event-id");
     const apiUrl: string = core.getInput("api-root");
     const token: string = core.getInput("token");
+
+    // Extract the eventId from the environment
+    const ref = process.env.GITHUB_REF;
+    const sha = process.env.GITHUB_SHA;
+    const eventId = getEventId(event, ref ?? "", sha ?? "");
 
     // Ensure the token gets masked from log output
     core.setSecret(token);

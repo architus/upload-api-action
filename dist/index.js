@@ -1159,6 +1159,29 @@ function fileExists(path) {
         return new Promise((r) => fs_1.default.access(path, fs_1.default.constants.F_OK, (e) => r(!e)));
     });
 }
+const PR_NUMBER_REGEX = /refs\/pull\/([0-9]+)\/merge/;
+/**
+ * Attempts to extract the PR number from the github ref
+ * @param ref - GitHub ref from the environment variable `GITHUB_REF`
+ */
+function extractPrNumber(ref) {
+    const matchObject = ref.match(PR_NUMBER_REGEX);
+    if (matchObject != null) {
+        return matchObject[1];
+    }
+    throw new Error(`No PR match on ref ${ref}`);
+}
+/**
+ * Gets the event ID from the event input and the ref/sha values
+ * @param event - underlying event name from the job
+ * @param ref - value of `GITHUB_REF` env variable
+ * @param sha - long commit SHA, value of `GITHUB_SHA` env variable
+ */
+function getEventId(event, ref, sha) {
+    if (event === "pull_request")
+        return extractPrNumber(ref);
+    return sha.slice(0, 7);
+}
 /**
  * Executes the primary logic of the action
  */
@@ -1168,9 +1191,12 @@ function run() {
             // Get inputs from job
             const archivePath = core.getInput("archive-path");
             const event = core.getInput("event");
-            const eventId = core.getInput("event_id");
-            const apiUrl = core.getInput("api-url");
+            const apiUrl = core.getInput("api-root");
             const token = core.getInput("token");
+            // Extract the eventId from the environment
+            const ref = process.env.GITHUB_REF;
+            const sha = process.env.GITHUB_SHA;
+            const eventId = getEventId(event, ref !== null && ref !== void 0 ? ref : "", sha !== null && sha !== void 0 ? sha : "");
             // Ensure the token gets masked from log output
             core.setSecret(token);
             // Make sure the archive path exists
@@ -1188,7 +1214,7 @@ function run() {
                 params: {
                     event,
                     // eslint-disable-next-line @typescript-eslint/camelcase
-                    event_id: eventId,
+                    event_id: event === "commit" ? eventId.slice(0, 7) : extractPrNumber(eventId),
                 },
                 headers: Object.assign({ Authorization: `Bearer ${token}` }, formData.getHeaders()),
             });
