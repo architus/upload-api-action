@@ -1224,6 +1224,7 @@ function run() {
             core.info("Successfully uploaded archive to staging Upload API");
         }
         catch (error) {
+            core.debug(JSON.stringify(error));
             core.setFailed(error.message);
         }
     });
