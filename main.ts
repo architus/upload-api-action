@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import fs from "fs";
 import axios, { AxiosError } from "axios";
 import FormData from "form-data";
+import jsonStringify from "safe-json-stringify";
 
 /**
  * Checks to see if a file exists using the fs API in an async function
@@ -91,10 +92,10 @@ async function run(): Promise<void> {
   } catch (error) {
     if (error.response != null) {
       const axiosError = error as AxiosError;
-      core.debug(JSON.stringify(axiosError.response));
+      core.debug(jsonStringify(axiosError.response as object));
       core.setFailed(`${axiosError.message}: ${axiosError.response?.data}`);
     } else {
-      core.debug(JSON.stringify(error));
+      core.debug(jsonStringify(error));
       core.setFailed(error.message);
     }
   }

@@ -1150,6 +1150,7 @@ const core = __importStar(__webpack_require__(470));
 const fs_1 = __importDefault(__webpack_require__(747));
 const axios_1 = __importDefault(__webpack_require__(53));
 const form_data_1 = __importDefault(__webpack_require__(928));
+const safe_json_stringify_1 = __importDefault(__webpack_require__(616));
 /**
  * Checks to see if a file exists using the fs API in an async function
  * @param path - Filesystem path
@@ -1227,11 +1228,11 @@ function run() {
         catch (error) {
             if (error.response != null) {
                 const axiosError = error;
-                core.debug(JSON.stringify(axiosError.response));
+                core.debug(safe_json_stringify_1.default(axiosError.response));
                 core.setFailed(`${axiosError.message}: ${(_a = axiosError.response) === null || _a === void 0 ? void 0 : _a.data}`);
             }
             else {
-                core.debug(JSON.stringify(error));
+                core.debug(safe_json_stringify_1.default(error));
                 core.setFailed(error.message);
             }
         }
@@ -3598,6 +3599,78 @@ module.exports = function isAbsoluteURL(url) {
 /***/ (function(module) {
 
 module.exports = require("http");
+
+/***/ }),
+
+/***/ 616:
+/***/ (function(module) {
+
+var hasProp = Object.prototype.hasOwnProperty;
+
+function throwsMessage(err) {
+	return '[Throws: ' + (err ? err.message : '?') + ']';
+}
+
+function safeGetValueFromPropertyOnObject(obj, property) {
+	if (hasProp.call(obj, property)) {
+		try {
+			return obj[property];
+		}
+		catch (err) {
+			return throwsMessage(err);
+		}
+	}
+
+	return obj[property];
+}
+
+function ensureProperties(obj) {
+	var seen = [ ]; // store references to objects we have seen before
+
+	function visit(obj) {
+		if (obj === null || typeof obj !== 'object') {
+			return obj;
+		}
+
+		if (seen.indexOf(obj) !== -1) {
+			return '[Circular]';
+		}
+		seen.push(obj);
+
+		if (typeof obj.toJSON === 'function') {
+			try {
+				var fResult = visit(obj.toJSON());
+				seen.pop();
+				return fResult;
+			} catch(err) {
+				return throwsMessage(err);
+			}
+		}
+
+		if (Array.isArray(obj)) {
+			var aResult = obj.map(visit);
+			seen.pop();
+			return aResult;
+		}
+
+		var result = Object.keys(obj).reduce(function(result, prop) {
+			// prevent faulty defined getter properties
+			result[prop] = visit(safeGetValueFromPropertyOnObject(obj, prop));
+			return result;
+		}, {});
+		seen.pop();
+		return result;
+	};
+
+	return visit(obj);
+}
+
+module.exports = function(data, replacer, space) {
+	return JSON.stringify(ensureProperties(data), replacer, space);
+}
+
+module.exports.ensureProperties = ensureProperties;
+
 
 /***/ }),
 
