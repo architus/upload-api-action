@@ -1,8 +1,7 @@
-import * as core from "@actions/core";
 import fs from "fs";
-import path from "path";
-import request from "request";
+import * as core from "@actions/core";
 import jsonStringify from "safe-json-stringify";
+import upload from "./upload";
 
 /**
  * Checks to see if a file exists using the fs API in an async function
@@ -67,33 +66,13 @@ async function run(): Promise<void> {
 
     const resolvedEvent = event === "pull_request" ? "pr" : "commit";
     core.info(`Preparing request to Upload API at ${resolvedEvent}/${eventId}`);
-
-    const url = `${apiUrl}/upload`;
-    const filename = path.basename(archivePath);
-    const archiveStream = fs.createReadStream(archivePath);
-    await new Promise<void>((resolve, failure) =>
-      request(
-        {
-          url,
-          method: "POST",
-          headers: {
-            "cache-control": "no-cache",
-            "content-disposition": `attachment; filename=${filename}`,
-            "content-type": "application/octet-stream",
-            authorization: "Basic token",
-          },
-          encoding: null,
-          body: archiveStream,
-        },
-        (error) => {
-          if (error) {
-            failure(error);
-          } else {
-            resolve();
-          }
-        },
-      ),
-    );
+    await upload({
+      apiUrl,
+      event: resolvedEvent,
+      eventId,
+      token,
+      filepath: archivePath,
+    });
 
     // Errors thrown here should be caught in the try block, so request is successful if
     // we get to this line

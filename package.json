@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "Uploads build archives to the Architus staging upload API",
-  "main": "lib/main.js",
+  "main": "lib/action.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
@@ -22,13 +22,26 @@
     "staging",
     "ci"
   ],
+  "bin": {
+    "upload": "./lib/cli"
+  },
+  "oclif": {
+    "bin": "upload"
+  },
+  "files": [
+    "/src",
+    "/lib",
+    "/dist"
+  ],
   "author": "architus",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.0",
-    "@types/request": "^2.48.5",
+    "@oclif/errors": "^1.2.2",
+    "@types/got": "^9.6.11",
     "@types/safe-json-stringify": "^1.1.1",
-    "request": "^2.88.2",
+    "got": "^11.1.4",
+    "oclif": "^1.16.1",
     "safe-json-stringify": "^1.2.0"
   },
   "devDependencies": {
