@@ -8,10 +8,13 @@ inputs:
     description: 'Cause of CI run (`pr` or `commit`)'
     required: true
   event-id:
-    description: 'Short commit SHA or PR Id'
+    description: 'Short commit SHA or GitHub ref if a PR'
     required: true
   token:
     description: 'Upload API token'
+    required: true
+  api-root:
+    description: 'Root URL of upload API (without trailing slash)'
     required: true
 runs:
   using: 'node12'
