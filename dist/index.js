@@ -657,6 +657,9 @@ function run() {
             const archivePath = core.getInput("archive-path");
             const apiUrl = core.getInput("api-root");
             const token = core.getInput("token");
+            let namespace = core.getInput("namespace");
+            if (namespace == null || namespace.trim() === "")
+                namespace = null;
             // Extract the eventId from the environment
             const event = (_a = process.env.GITHUB_EVENT_NAME) !== null && _a !== void 0 ? _a : "";
             const ref = process.env.GITHUB_REF;
@@ -671,16 +674,19 @@ function run() {
             }
             const resolvedEvent = event === "pull_request" ? "pr" : "commit";
             core.info(`Preparing request to Upload API at ${resolvedEvent}/${eventId}`);
-            yield upload_1.default({
+            const { path, url } = yield upload_1.default({
                 apiUrl,
                 event: resolvedEvent,
                 eventId,
                 token,
                 filepath: archivePath,
+                namespace: namespace !== null && namespace !== void 0 ? namespace : undefined,
             });
             // Errors thrown here should be caught in the try block, so request is successful if
             // we get to this line
-            core.info("Successfully uploaded archive to staging Upload API");
+            core.info(`Successfully uploaded archive to staging Upload API at ${url}`);
+            core.setOutput("path", path);
+            core.setOutput("url", url);
         }
         catch (error) {
             core.debug(safe_json_stringify_1.default(error));
@@ -5007,16 +5013,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = __importDefault(__webpack_require__(747));
 const path_1 = __importDefault(__webpack_require__(622));
 const got_1 = __importDefault(__webpack_require__(77));
+// From: https://stackoverflow.com/a/49428486/13192375
+function streamToString(incoming) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const chunks = [];
+        return new Promise((resolve, reject) => {
+            incoming.on("data", (chunk) => chunks.push(chunk));
+            incoming.on("error", reject);
+            incoming.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+        });
+    });
+}
 /**
  * Performs the core upload logic to send the file at the given path to the upload server
  * at `${apiUrl}/upload`
  */
-function upload({ apiUrl, event, eventId, filepath, token, }) {
+function upload({ apiUrl, event, eventId, filepath, token, namespace = null, }) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `${apiUrl}/upload?event=${event}&event_id=${eventId}`;
+        // Construct URL with query params
+        let url = `${apiUrl}/upload?event=${event}&event_id=${eventId}`;
+        if (namespace != null) {
+            url += `&namespace=${namespace}`;
+        }
         const filename = path_1.default.basename(filepath);
         const fileStream = fs_1.default.createReadStream(filepath);
-        got_1.default.stream.post(url, {
+        const result = yield streamToString(got_1.default.stream.post(url, {
             body: fileStream,
             retry: 0,
             headers: {
@@ -5024,8 +5045,10 @@ function upload({ apiUrl, event, eventId, filepath, token, }) {
                 "content-disposition": `attachment; filename=${filename}`,
                 "content-type": "application/octet-stream",
                 authorization: `Bearer ${token}`,
+                responseType: "json",
             },
-        });
+        }));
+        return JSON.parse(result);
     });
 }
 exports.default = upload;

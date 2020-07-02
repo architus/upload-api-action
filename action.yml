@@ -10,6 +10,9 @@ inputs:
   api-root:
     description: 'Root URL of upload API (without trailing slash)'
     required: true
+  namespace:
+    description: 'Upload API namespace (optional)'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

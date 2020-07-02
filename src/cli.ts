@@ -11,7 +11,8 @@ import upload from "./upload";
  *   --apiUrl "https://staging.archit.us/api" \
  *   --event "commit" \
  *   --eventId "aaaaaaa" \
- *   --filepath ../archit.us/dist.tar.gz
+ *   --filepath ../archit.us/dist.tar.gz \
+ *   --namespace "docs"
  * ```
  */
 class LS extends Command {
@@ -38,12 +39,17 @@ class LS extends Command {
       char: "f",
       required: true,
     }),
+    namespace: flags.string({
+      char: "n",
+      required: false,
+    }),
   };
 
   async run(): Promise<void> {
-    const { token, apiUrl, event, eventId, filepath } = this.parse(LS).flags;
     try {
-      await upload({ token, apiUrl, event, eventId, filepath });
+      const result = await upload(this.parse(LS).flags);
+      // eslint-disable-next-line no-console
+      console.log(result);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);

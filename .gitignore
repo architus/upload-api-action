@@ -21,3 +21,6 @@ token
 
 # Intermediate build artifacts
 lib/
+
+# IDE files
+.vscode

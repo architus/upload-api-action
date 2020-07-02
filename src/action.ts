@@ -48,6 +48,8 @@ async function run(): Promise<void> {
     const archivePath: string = core.getInput("archive-path");
     const apiUrl: string = core.getInput("api-root");
     const token: string = core.getInput("token");
+    let namespace: string | null = core.getInput("namespace");
+    if (namespace == null || namespace.trim() === "") namespace = null;
 
     // Extract the eventId from the environment
     const event = process.env.GITHUB_EVENT_NAME ?? "";
@@ -66,17 +68,20 @@ async function run(): Promise<void> {
 
     const resolvedEvent = event === "pull_request" ? "pr" : "commit";
     core.info(`Preparing request to Upload API at ${resolvedEvent}/${eventId}`);
-    await upload({
+    const { path, url } = await upload({
       apiUrl,
       event: resolvedEvent,
       eventId,
       token,
       filepath: archivePath,
+      namespace: namespace ?? undefined,
     });
 
     // Errors thrown here should be caught in the try block, so request is successful if
     // we get to this line
-    core.info("Successfully uploaded archive to staging Upload API");
+    core.info(`Successfully uploaded archive to staging Upload API at ${url}`);
+    core.setOutput("path", path);
+    core.setOutput("url", url);
   } catch (error) {
     core.debug(jsonStringify(error));
     core.setFailed(error.message);
