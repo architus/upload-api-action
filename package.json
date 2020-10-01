@@ -36,7 +36,7 @@
   "author": "architus",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.2.6",
     "@oclif/errors": "^1.2.2",
     "@types/got": "^9.6.11",
     "@types/safe-json-stringify": "^1.1.1",
